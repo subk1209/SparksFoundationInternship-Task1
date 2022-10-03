@@ -1,2 +1,2 @@
-A code is attached in the main section. This is related to my first task in Sparks Foundation as a Data science and business analytics intern.
+A code is attached in the main section. This is related to my first task in Sparks Foundation as a Data science and business analytics intern, which is a simple prediction model using supervised ML.
 The brief description of the task : Here we are provided with a dataset containing 25 observations on hours of study and percentage scores obtained in exam, and we have to build a regrassion model to predict the percentage score of a student who studies 9.25 hours per day.
