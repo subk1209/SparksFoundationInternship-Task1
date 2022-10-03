@@ -1,0 +1,104 @@
+rm(list = ls())
+
+# Importing libraries
+library(ggplot2)
+
+# Loading the data
+df = read.csv('http://bit.ly/w-data')
+View(df)
+summary(df)
+
+par(mar = c(3,5,3,3))
+par(mfrow = c(1,2))
+boxplot(df$Hours, col = 7,
+        main = 'Boxplot of hours of study',
+        ylab = 'Study hrs.', las = 1, lwd = 2,
+        cex.main = 2, cex.lab = 1.2)
+boxplot(df$Scores, col = 3,
+        main = 'Boxplot of exam scores',
+        ylab = 'Score', las = 1, lwd = 2,
+        cex.main = 2, cex.lab = 1.2)
+
+ggplot(df, aes(x = Hours, y = Scores)) +
+        geom_point(colour = 'red') +
+        theme_fivethirtyeight() +
+        labs(title = 'Scatterplot of Study hours vs. Exam score \n',
+             x = 'Hours of study', y = 'Percentage score') +
+        theme(plot.title = element_text(face = 'bold',
+                                        size = 20, 
+                                        colour = 'darkblue'),
+              axis.title = element_text(face = 'bold'),
+              axis.text = element_text(face = 'bold'),
+              axis.title.x = element_text(vjust = -3),
+              axis.title.y = element_text(vjust = 5),
+              plot.margin = unit(c(1,1.5,1,1.4),'cm')) +
+        scale_y_continuous(n.breaks = 10)
+
+set.seed(123)
+rs = sample(c('train','test'),
+            replace = T,
+            size = nrow(df),
+            prob = c(0.75,0.25)); rs
+
+
+df_train = df[rs == 'train',]; df_train
+df_test = df[rs == 'test',]; df_test
+
+# fitting linear model to the train data :
+l = lm(Scores ~ Hours, data = df_train); l
+
+# model summary :
+summary.lm(l)
+
+ggplot(df_train, aes(x = Hours, y = Scores)) +
+        geom_point(colour = 'red') +
+        geom_smooth(method = 'lm', colour = 'blue') +
+        theme_fivethirtyeight() +
+        labs(title = 'Fitting of linear regression on the train data',
+             subtitle = 'Predictor : Study hours | Response : Percentage score \n',
+             x = 'Hours of study', y = 'Percentage score') +
+        theme(plot.title = element_text(face = 'bold',
+                                        size = 20, 
+                                        colour = 'darkblue'),
+              plot.subtitle = element_text(face = 'bold',
+                                           colour = 'darkred',
+                                           size = 12),
+              axis.title = element_text(face = 'bold'),
+              axis.text = element_text(face = 'bold'),
+              axis.title.x = element_text(vjust = -3),
+              axis.title.y = element_text(vjust = 5),
+              plot.margin = unit(c(1,1.5,1,1.4),'cm')) +
+        scale_y_continuous(n.breaks = 10)
+
+pred_func = function(x) (as.numeric(l$coefficients[1] + x*l$coefficients[2]))
+
+score_pred = pred_func(df_test$Hours)
+data.frame('Original score' = df_test$Scores,
+                 'Predicted score' = score_pred)
+
+
+df2 = data.frame("Hours" = rep(df_test$Hours,2),
+                 'Scores' = c(df_test$Scores, score_pred),
+                 'type' = rep(c('Original','Predicted'),
+                              each = nrow(df_test)))
+View(df2)
+
+ggplot(df2, aes(x = Hours, y = Scores, colour = type)) +
+        geom_point(aes(colour = type)) +
+        theme_minimal() +
+        labs(x = 'Hours of study', y = 'Percentage score',
+             colour = "Score types") +
+        theme(axis.title = element_text(face = 'bold'),
+              axis.text = element_text(face = 'bold'),
+              axis.title.x = element_text(vjust = -3),
+              axis.title.y = element_text(vjust = 5),
+              legend.title = element_text(face = 'bold'),
+              legend.text = element_text(face = 'bold'),
+              plot.margin = unit(c(1,1.5,1,1.4),'cm')) +
+        scale_y_continuous(n.breaks = 10) +
+        scale_x_continuous(n.breaks = 10)
+
+pred_func(9.25)
+
+
+
